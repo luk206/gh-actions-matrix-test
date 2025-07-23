@@ -1,0 +1,16 @@
+name: Matrix Test
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 3  # controla la cantidad simultánea
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: [16, 18]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show matrix values
+        run: echo "Running on ${{ matrix.os }} with Node.js ${{ matrix.node }}"
