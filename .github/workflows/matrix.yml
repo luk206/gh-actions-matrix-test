@@ -6,7 +6,7 @@ jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 3  # controla la cantidad simultánea
+      max-parallel: 6  # controla la cantidad simultánea
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         node: [16, 18]
