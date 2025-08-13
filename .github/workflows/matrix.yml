@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       env_list:
-        description: "Lista de entornos como JSON (ej: [\"dev1\",\"dev2\"]), vacía para usar la lista por defecto"
+        description: "Lista de entornos separados por comas (ej: dev1,dev2,dev3). Dejar vacío para usar todos por defecto."
         required: false
-        default: '["dev1","dev2","dev3","dev4","dev5","dev6","dev7","dev8","dev9","dev11","dev12","dev13","dev14","dev15","dev16","dev17","dev18","dev19"]'
+        default: "dev1,dev2,dev3,dev4,dev5,dev6,dev7,dev8,dev9,dev11,dev12,dev13,dev14,dev15,dev16,dev17,dev18,dev19"
 
 jobs:
   test-matrix:
@@ -14,7 +14,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        env: ${{ fromJSON(github.event.inputs.env_list) }}
+        env: ${{ github.event.inputs.env_list && split(github.event.inputs.env_list, ',') }}
     steps:
       - name: Show matrix values
         run: |
