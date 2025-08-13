@@ -11,7 +11,7 @@ jobs:
   test-matrix:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 2
+      max-parallel: 4
       matrix:
         env: [dev1, dev2, dev3, dev4, dev5, dev6, dev7, dev8, dev9, dev11, dev12, dev13, dev14, dev15, dev16, dev17, dev18, dev19]
     steps:
