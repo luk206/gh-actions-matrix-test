@@ -24,7 +24,7 @@ jobs:
     steps:
       - name: Show project and environment
         run: |
+          sleep 10
           echo "Project: ${{ matrix.project }}"
           echo "Environment: ${{ matrix.env }}"
           echo "Region: ${{ matrix.region }}"
-          sleep 1
