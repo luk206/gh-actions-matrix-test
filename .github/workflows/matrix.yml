@@ -1,16 +1,19 @@
-name: Matrix Test
+name: Simple Matrix
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
 
 jobs:
-  test:
-    runs-on: ${{ matrix.os }}
+  test-matrix:
+    runs-on: ubuntu-latest
     strategy:
-      max-parallel: 6  # controla la cantidad simultánea
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        node: [16, 18]
+        env: [dev, staging, prod]
+        version: [1, 2]
     steps:
-      - uses: actions/checkout@v4
       - name: Show matrix values
-        run: echo "Running on ${{ matrix.os }} with Node.js ${{ matrix.node }}"
+        run: |
+          echo "Environment: ${{ matrix.env }}"
+          echo "Version: ${{ matrix.version }}"
