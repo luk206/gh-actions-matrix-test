@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       matrix_list:
-        description: "List of combinations project+env+region as JSON"
+        description: "List of project+env+region combinations as JSON"
         required: true
         default: >        
           [
@@ -15,7 +15,7 @@ on:
             {"project": "1000-6", "env": "prd", "region": "eu-west-1"}
           ]
       exclude_list:
-        description: "Lista de combos project:env a excluir, separados por coma"
+        description: "List of project:env combinations to exclude, separated by commas"
         required: false
         default: "1000-5:mlops,1000-6:dev"
 
@@ -28,7 +28,7 @@ jobs:
         include: ${{ fromJSON(github.event.inputs.matrix_list) }}
 
     steps:
-      - name: Show project and environment
+      - name: Display project and environment
         run: |
           EXCLUDES="${{ github.event.inputs.exclude_list }}"
           KEY="${{ matrix.project }}:${{ matrix.env }}"
