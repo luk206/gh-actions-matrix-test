@@ -1,4 +1,4 @@
-name: 50 Projects Matrix
+name: Projects Matrix
 
 on:
   workflow_dispatch:
