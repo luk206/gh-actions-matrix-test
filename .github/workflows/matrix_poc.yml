@@ -1,4 +1,4 @@
-name: Projects Matrix PoC
+name: Projects Matrix Multi-Job
 
 on:
   workflow_dispatch:
@@ -20,37 +20,31 @@ on:
         default: '["1000-5:mlops","1000-6:dev"]'
 
 jobs:
-  project-env-matrix:
+  build:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 5
       matrix:
         include: ${{ fromJSON(github.event.inputs.matrix_list) }}
-
+    if: ${{ !contains(fromJSON(github.event.inputs.exclude_list), format('{0}:{1}', matrix.project, matrix.env)) }}
     steps:
-      - name: Check if excluded
-        id: check_exclude
-        run: |
-          EXCLUDES=$(echo '${{ github.event.inputs.exclude_list }}' | jq -r '.[]')
-          KEY="${{ matrix.project }}:${{ matrix.env }}"
-          SKIP=false
-          for ex in $EXCLUDES; do
-            if [ "$KEY" = "$ex" ]; then
-              echo "This combo is excluded: $KEY"
-              SKIP=true
-              break
-            fi
-          done
-          echo "skip=$SKIP" >> $GITHUB_OUTPUT
+      - run: echo "Building project ${{ matrix.project }} in env ${{ matrix.env }}"
 
-      - name: Step 1
-        if: ${{ steps.check_exclude.outputs.skip != 'true' }}
-        run: echo "Running Step 1 for ${{ matrix.project }}:${{ matrix.env }}"
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include: ${{ fromJSON(github.event.inputs.matrix_list) }}
+    if: ${{ !contains(fromJSON(github.event.inputs.exclude_list), format('{0}:{1}', matrix.project, matrix.env)) }}
+    steps:
+      - run: echo "Testing project ${{ matrix.project }} in env ${{ matrix.env }}"
 
-      - name: Step 2
-        if: ${{ steps.check_exclude.outputs.skip != 'true' }}
-        run: echo "Running Step 2 for ${{ matrix.project }}:${{ matrix.env }}"
-
-      - name: Step 3
-        if: ${{ steps.check_exclude.outputs.skip != 'true' }}
-        run: echo "Running Step 3 for ${{ matrix.project }}:${{ matrix.env }}"
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include: ${{ fromJSON(github.event.inputs.matrix_list) }}
+    if: ${{ !contains(fromJSON(github.event.inputs.exclude_list), format('{0}:{1}', matrix.project, matrix.env)) }}
+    steps:
+      - run: echo "Deploying project ${{ matrix.project }} in env ${{ matrix.env }}"
