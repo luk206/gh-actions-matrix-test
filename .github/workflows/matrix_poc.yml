@@ -20,7 +20,7 @@ on:
         default: '["1000-5:mlops","1000-6:dev"]'
 
 jobs:
-  project-env-matrix:
+  plan:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
@@ -54,3 +54,39 @@ jobs:
       - name: Step 3
         if: ${{ steps.check_exclude.outputs.skip != 'true' }}
         run: echo "Running Step 3 for ${{ matrix.project }}:${{ matrix.env }}"
+
+  apply:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+      matrix:
+        include: ${{ fromJSON(github.event.inputs.matrix_list) }}
+
+    steps:
+      - name: Check if excluded
+        id: check_exclude
+        run: |
+          EXCLUDES=$(echo '${{ github.event.inputs.exclude_list }}' | jq -r '.[]')
+          KEY="${{ matrix.project }}:${{ matrix.env }}"
+          SKIP=false
+          for ex in $EXCLUDES; do
+            if [ "$KEY" = "$ex" ]; then
+              echo "This combo is excluded: $KEY"
+              SKIP=true
+              break
+            fi
+          done
+          echo "skip=$SKIP" >> $GITHUB_OUTPUT
+
+      - name: Step 4
+        if: ${{ steps.check_exclude.outputs.skip != 'true' }}
+        run: echo "Running Step 1 for ${{ matrix.project }}:${{ matrix.env }}"
+
+      - name: Step 5
+        if: ${{ steps.check_exclude.outputs.skip != 'true' }}
+        run: echo "Running Step 2 for ${{ matrix.project }}:${{ matrix.env }}"
+
+      - name: Step 6
+        if: ${{ steps.check_exclude.outputs.skip != 'true' }}
+        run: echo "Running Step 3 for ${{ matrix.project }}:${{ matrix.env }}"
+        
