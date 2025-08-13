@@ -1,4 +1,4 @@
-name: Projects Matrix
+name: Projects Matrix PoC
 
 on:
   workflow_dispatch:
