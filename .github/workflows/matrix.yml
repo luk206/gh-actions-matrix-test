@@ -17,4 +17,5 @@ jobs:
     steps:
       - name: Show matrix values
         run: |
+          sleep 10
           echo "Environment: ${{ matrix.env }}"
