@@ -1,4 +1,4 @@
-name: Projects Matrix Simple
+name: Projects Matrix Híbrido
 
 on:
   workflow_dispatch:
@@ -8,28 +8,49 @@ on:
         required: false
         default: '{"1000-5":["dev","mlops","prd"],"1000-6":["dev","prd"]}'
       exclude_list:
-        description: "Lista de combos project:env a excluir"
+        description: "Lista de combos project:env a excluir, separados por coma"
         required: false
         default: '1000-5:mlops'
 
 jobs:
-  project-env-loop:
+  generate-matrix:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - name: Generate combos and run
+      - name: Crear matrix dinámico
+        id: set-matrix
         run: |
-          PROJECTS="${{ github.event.inputs.project_env_map }}"
-          EXCLUDES="${{ github.event.inputs.exclude_list }}"
+          PROJECTS='${{ github.event.inputs.project_env_map }}'
+          EXCLUDES='${{ github.event.inputs.exclude_list }}'
 
+          MATRIX=[]
           for project in $(echo "$PROJECTS" | jq -r 'keys[]'); do
-            envs=$(echo "$PROJECTS" | jq -r --arg p "$project" '.[$p][]')
-            for env in $envs; do
+            for env in $(echo "$PROJECTS" | jq -r --arg p "$project" '.[$p][]'); do
               KEY="$project:$env"
               if echo "$EXCLUDES" | grep -q "$KEY"; then
-                echo "Skipping $KEY"
                 continue
               fi
-              echo "Running project $project env $env region eu-west-1"
-              sleep 1
+              MATRIX+=("{\"project\":\"$project\",\"env\":\"$env\",\"region\":\"eu-west-1\"}")
             done
           done
+
+          MATRIX_JSON=$(printf "%s\n" "${MATRIX[@]}" | jq -s '.')
+          echo "$MATRIX_JSON" > matrix.json
+          echo "::set-output name=matrix::$MATRIX_JSON"
+
+  project-env-matrix:
+    needs: generate-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+      matrix:
+        include: ${{ fromJSON(needs.generate-matrix.outputs.matrix) }}
+
+    steps:
+      - name: Show project and environment
+        run: |
+          echo "Project: ${{ matrix.project }}"
+          echo "Env: ${{ matrix.env }}"
+          echo "Region: ${{ matrix.region }}"
+          sleep 1
