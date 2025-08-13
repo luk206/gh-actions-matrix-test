@@ -1,4 +1,4 @@
-name: Projects Matrix PoC
+name: Projects Matrix
 
 on:
   workflow_dispatch:
@@ -10,12 +10,14 @@ on:
           [
             {"project": "1000-5", "env": "dev", "region": "eu-west-1"},
             {"project": "1000-5", "env": "mlops", "region": "eu-west-1"},
-            {"project": "1000-5", "env": "prd", "region": "eu-west-1"}
+            {"project": "1000-5", "env": "prd", "region": "eu-west-1"},
+            {"project": "1000-6", "env": "dev", "region": "eu-west-1"},
+            {"project": "1000-6", "env": "prd", "region": "eu-west-1"}
           ]
       exclude_list:
         description: "Lista de combos project:env a excluir, separados por coma"
         required: false
-        default: "1000-5:mlops"
+        default: "1000-5:mlops,1000-6:dev"
 
 jobs:
   project-env-matrix:
@@ -31,10 +33,12 @@ jobs:
           EXCLUDES="${{ github.event.inputs.exclude_list }}"
           KEY="${{ matrix.project }}:${{ matrix.env }}"
 
-          if echo "$EXCLUDES" | grep -q "$KEY"; then
-            echo "Skipping $KEY"
-            exit 0
-          fi
+          for ex in $(echo "$EXCLUDES" | tr ',' '\n'); do
+            if [ "$KEY" = "$ex" ]; then
+              echo "Skipping $KEY"
+              exit 0
+            fi
+          done
 
           sleep 10
           echo "Project: ${{ matrix.project }}"
