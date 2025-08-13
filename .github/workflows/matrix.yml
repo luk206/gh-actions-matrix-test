@@ -9,6 +9,7 @@ jobs:
   test-matrix:
     runs-on: ubuntu-latest
     strategy:
+      max-parallel: 2
       matrix:
         env: [dev, staging, prod]
         version: [1, 2]
