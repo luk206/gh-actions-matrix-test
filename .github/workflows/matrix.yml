@@ -10,7 +10,7 @@ on:
       exclude_list:
         description: "Lista de entornos a excluir como JSON (ej: [{\"project\":\"1000-537\"},{\"project\":\"1000-540\"}])"
         required: false
-        default: '[]'
+        default: '[{"project":"1000-537"},{"project":"1000-540"}]'
 
 jobs:
   test-matrix:
