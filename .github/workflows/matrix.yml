@@ -6,27 +6,594 @@ on:
       matrix_list:
         description: "Lista de combinaciones project+env como JSON"
         required: true
-        default: > 
+        default: >        
           [
-            {"project": "azmlops-1000-533-env-dev", "env": "dev", "region": "eu-west-1"},
-            {"project": "azmlops-1000-537-env-dev", "env": "dev", "region": "eu-west-1"},
-            {"project": "azmlops-1000-538-env-dev", "env": "dev", "region": "eu-west-1"},
-            {"project": "azmlops-1000-540-env-dev", "env": "dev", "region": "eu-west-1"},
-            {"project": "azmlops-1000-541-env-dev", "env": "dev", "region": "eu-west-1"},
-            {"project": "azmlops-1000-541-env-mlops", "env": "mlops", "region": "eu-west-1"},
-            {"project": "azmlops-1000-542-env-dev", "env": "dev", "region": "eu-west-1"},
-            {"project": "azmlops-1000-545-env-dev", "env": "dev", "region": "eu-west-1"},
-            {"project": "azmlops-1000-549-env-dev", "env": "dev", "region": "eu-west-1"},
-            {"project": "azmlops-1000-549-env-prd", "env": "prd", "region": "eu-west-1"},
-            {"project": "azmlops-1000-550-env-dev", "env": "dev", "region": "eu-west-1"},
-            {"project": "azmlops-1000-551-env-dev", "env": "dev", "region": "eu-west-1"},
-            {"project": "azmlops-1000-552-env-dev", "env": "dev", "region": "eu-west-1"},
-            {"project": "azmlops-1000-552-env-prd", "env": "prd", "region": "eu-west-1"},
-            {"project": "azmlops-1000-553-env-dev", "env": "dev", "region": "eu-west-1"},
-            {"project": "azmlops-1000-553-env-ppt", "env": "ppt", "region": "eu-west-1"},
-            {"project": "azmlops-1000-553-env-prd", "env": "prd", "region": "eu-west-1"},
-          ]
-                
+            {
+              "project": "azmlops-1000-5
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "mlops",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "prd",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "prd",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "ppt",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "prd",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-5
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-6
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-6
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-6
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-6
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-6
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-6
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-6
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-6
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-6
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-6
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-6
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-6
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-6
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-6
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-6
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-6
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "ppt",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "prd",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "prd",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "aether",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-1000-7
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-0
+              "env": "bcd",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-0
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-0
+              "env": "dev10",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-0
+              "env": "dev24",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-0
+              "env": "dev27",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-0
+              "env": "dev29",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-0
+              "env": "dev30",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-0
+              "env": "dev31",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-0
+              "env": "dev370",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-0
+              "env": "dev40",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-0
+              "env": "dev50",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-0
+              "env": "dev51",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-0
+              "env": "devab",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-0
+              "env": "eng",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-0
+              "env": "mbdev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-0
+              "env": "prd29",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-0
+              "env": "sid",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-0
+              "env": "tst",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-1
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-1
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-1
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-1
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-1
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-1
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-1
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-1
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-1
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-1
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-1
+              "env": "prd",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-1
+              "env": "tst",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-1
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-1
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-1
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-1
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-1
+              "env": "dev",
+              "region": "eu-west-1"
+            },
+            {
+              "project": "azmlops-3000-1
+              "env": "dev",
+              "region": "eu-west-1"
+            }
+          ]                   
 jobs:
   project-env-matrix:
     runs-on: ubuntu-latest
