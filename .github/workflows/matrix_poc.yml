@@ -56,6 +56,7 @@ jobs:
         run: echo "Running Step 3 for ${{ matrix.project }}:${{ matrix.env }}"
 
   apply:
+    needs: plan  
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
