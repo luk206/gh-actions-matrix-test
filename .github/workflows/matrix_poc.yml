@@ -1,56 +1,42 @@
-name: Projects Matrix Híbrido
+name: Projects Matrix
 
 on:
   workflow_dispatch:
     inputs:
-      project_env_map:
-        description: "JSON de proyectos y entornos"
-        required: false
-        default: '{"1000-5":["dev","mlops","prd"],"1000-6":["dev","prd"]}'
+      matrix_list:
+        description: "List of combinations project+env+region as JSON"
+        required: true
+        default: >        
+          [
+            {"project": "1000-5", "env": "dev", "region": "eu-west-1"},
+            {"project": "1000-5", "env": "mlops", "region": "eu-west-1"},
+            {"project": "1000-5", "env": "prd", "region": "eu-west-1"}
+          ]
       exclude_list:
         description: "Lista de combos project:env a excluir, separados por coma"
         required: false
-        default: '1000-5:mlops'
+        default: "1000-5:mlops"
 
 jobs:
-  generate-matrix:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - name: Crear matrix dinámico
-        id: set-matrix
-        run: |
-          PROJECTS='${{ github.event.inputs.project_env_map }}'
-          EXCLUDES='${{ github.event.inputs.exclude_list }}'
-
-          MATRIX=[]
-          for project in $(echo "$PROJECTS" | jq -r 'keys[]'); do
-            for env in $(echo "$PROJECTS" | jq -r --arg p "$project" '.[$p][]'); do
-              KEY="$project:$env"
-              if echo "$EXCLUDES" | grep -q "$KEY"; then
-                continue
-              fi
-              MATRIX+=("{\"project\":\"$project\",\"env\":\"$env\",\"region\":\"eu-west-1\"}")
-            done
-          done
-
-          MATRIX_JSON=$(printf "%s\n" "${MATRIX[@]}" | jq -s '.')
-          echo "$MATRIX_JSON" > matrix.json
-          echo "::set-output name=matrix::$MATRIX_JSON"
-
   project-env-matrix:
-    needs: generate-matrix
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
       matrix:
-        include: ${{ fromJSON(needs.generate-matrix.outputs.matrix) }}
+        include: ${{ fromJSON(github.event.inputs.matrix_list) }}
 
     steps:
       - name: Show project and environment
         run: |
+          EXCLUDES="${{ github.event.inputs.exclude_list }}"
+          KEY="${{ matrix.project }}:${{ matrix.env }}"
+
+          if echo "$EXCLUDES" | grep -q "$KEY"; then
+            echo "Skipping $KEY"
+            exit 0
+          fi
+
+          sleep 10
           echo "Project: ${{ matrix.project }}"
-          echo "Env: ${{ matrix.env }}"
+          echo "Environment: ${{ matrix.env }}"
           echo "Region: ${{ matrix.region }}"
-          sleep 1
