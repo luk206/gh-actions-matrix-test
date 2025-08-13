@@ -23,4 +23,4 @@ jobs:
     steps:
       - name: Show matrix values
         run: |
-          echo "Running on env: ${{ matrix.env }}"
+          echo "Running on project: ${{ matrix.project }}"
