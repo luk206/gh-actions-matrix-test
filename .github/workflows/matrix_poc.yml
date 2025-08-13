@@ -4,20 +4,20 @@ on:
   workflow_dispatch:
     inputs:
       matrix_list:
-        description: "List of project+env+region combinations as JSON"
+        description: "List of project+env combinations as JSON"
         required: true
-        default: >        
+        default: >
           [
-            {"project": "1000-5", "env": "dev", "region": "eu-west-1"},
-            {"project": "1000-5", "env": "mlops", "region": "eu-west-1"},
-            {"project": "1000-5", "env": "prd", "region": "eu-west-1"},
-            {"project": "1000-6", "env": "dev", "region": "eu-west-1"},
-            {"project": "1000-6", "env": "prd", "region": "eu-west-1"}
+            {"project": "1000-5", "env": "dev"},
+            {"project": "1000-5", "env": "mlops"},
+            {"project": "1000-5", "env": "prd"},
+            {"project": "1000-6", "env": "dev"},
+            {"project": "1000-6", "env": "prd"}
           ]
       exclude_list:
-        description: "List of project:env combinations to exclude, separated by commas"
+        description: "Array of project:env combos to exclude"
         required: false
-        default: "1000-5:mlops,1000-6:dev"
+        default: '["1000-5:mlops","1000-6:dev"]'
 
 jobs:
   project-env-matrix:
@@ -30,17 +30,17 @@ jobs:
     steps:
       - name: Display project and environment
         run: |
-          EXCLUDES="${{ github.event.inputs.exclude_list }}"
+          EXCLUDES=$(echo '${{ github.event.inputs.exclude_list }}' | jq -r '.[]')
           KEY="${{ matrix.project }}:${{ matrix.env }}"
 
-          for ex in $(echo "$EXCLUDES" | tr ',' '\n'); do
+          for ex in $EXCLUDES; do
             if [ "$KEY" = "$ex" ]; then
               echo "Skipping $KEY"
               exit 0
             fi
           done
 
+          echo "Processing $KEY"
           sleep 10
           echo "Project: ${{ matrix.project }}"
           echo "Environment: ${{ matrix.env }}"
-          echo "Region: ${{ matrix.region }}"
