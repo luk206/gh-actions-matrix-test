@@ -28,19 +28,33 @@ jobs:
         include: ${{ fromJSON(github.event.inputs.matrix_list) }}
 
     steps:
-      - name: Display project and environment
+      - name: Check if excluded
+        id: check_exclude
         run: |
           EXCLUDES=$(echo '${{ github.event.inputs.exclude_list }}' | jq -r '.[]')
           KEY="${{ matrix.project }}:${{ matrix.env }}"
-
           for ex in $EXCLUDES; do
             if [ "$KEY" = "$ex" ]; then
-              echo "Skipping $KEY"
-              exit 0
+              echo "This combo is excluded: $KEY"
+              exit 1
             fi
           done
+          echo "Combo is valid: $KEY"
 
-          echo "Processing $KEY"
-          sleep 10
-          echo "Project: ${{ matrix.project }}"
-          echo "Environment: ${{ matrix.env }}"
+      - name: Step 1
+        if: ${{ steps.check_exclude.outcome == 'success' }}
+        run: |
+          echo "Running Step 1 for ${{ matrix.project }}:${{ matrix.env }}"
+          sleep 5
+
+      - name: Step 2
+        if: ${{ steps.check_exclude.outcome == 'success' }}
+        run: |
+          echo "Running Step 2 for ${{ matrix.project }}:${{ matrix.env }}"
+          sleep 5
+
+      - name: Step 3
+        if: ${{ steps.check_exclude.outcome == 'success' }}
+        run: |
+          echo "Running Step 3 for ${{ matrix.project }}:${{ matrix.env }}"
+          sleep 5
