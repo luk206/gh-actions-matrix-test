@@ -8,35 +8,9 @@ on:
         required: true
         default: >        
           [
-            {"project": "azmlops-1000-5", "env": "dev", "region": "eu-west-1"},
-            {"project": "azmlops-1000-5", "env": "mlops", "region": "eu-west-1"},
-            {"project": "azmlops-1000-5", "env": "prd", "region": "eu-west-1"},
-            {"project": "azmlops-1000-5", "env": "ppt", "region": "eu-west-1"},
-            {"project": "azmlops-1000-6", "env": "dev", "region": "eu-west-1"},
-            {"project": "azmlops-1000-7", "env": "dev", "region": "eu-west-1"},
-            {"project": "azmlops-1000-7", "env": "ppt", "region": "eu-west-1"},
-            {"project": "azmlops-1000-7", "env": "prd", "region": "eu-west-1"},
-            {"project": "azmlops-3000-0", "env": "bcd", "region": "eu-west-1"},
-            {"project": "azmlops-3000-0", "env": "dev", "region": "eu-west-1"},
-            {"project": "azmlops-3000-0", "env": "dev10", "region": "eu-west-1"},
-            {"project": "azmlops-3000-0", "env": "dev24", "region": "eu-west-1"},
-            {"project": "azmlops-3000-0", "env": "dev27", "region": "eu-west-1"},
-            {"project": "azmlops-3000-0", "env": "dev29", "region": "eu-west-1"},
-            {"project": "azmlops-3000-0", "env": "dev30", "region": "eu-west-1"},
-            {"project": "azmlops-3000-0", "env": "dev31", "region": "eu-west-1"},
-            {"project": "azmlops-3000-0", "env": "dev370", "region": "eu-west-1"},
-            {"project": "azmlops-3000-0", "env": "dev40", "region": "eu-west-1"},
-            {"project": "azmlops-3000-0", "env": "dev50", "region": "eu-west-1"},
-            {"project": "azmlops-3000-0", "env": "dev51", "region": "eu-west-1"},
-            {"project": "azmlops-3000-0", "env": "devab", "region": "eu-west-1"},
-            {"project": "azmlops-3000-0", "env": "eng", "region": "eu-west-1"},
-            {"project": "azmlops-3000-0", "env": "mbdev", "region": "eu-west-1"},
-            {"project": "azmlops-3000-0", "env": "prd29", "region": "eu-west-1"},
-            {"project": "azmlops-3000-0", "env": "sid", "region": "eu-west-1"},
-            {"project": "azmlops-3000-0", "env": "tst", "region": "eu-west-1"},
-            {"project": "azmlops-3000-1", "env": "dev", "region": "eu-west-1"},
-            {"project": "azmlops-3000-1", "env": "prd", "region": "eu-west-1"},
-            {"project": "azmlops-3000-1", "env": "tst", "region": "eu-west-1"}
+            {"project": "1000-5", "env": "dev", "region": "eu-west-1"},
+            {"project": "1000-5", "env": "mlops", "region": "eu-west-1"},
+            {"project": "1000-5", "env": "prd", "region": "eu-west-1"},
           ]
 
 jobs:
