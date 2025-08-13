@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       matrix_list:
-        description: "Lista de combinaciones project+env como JSON"
+        description: "List of combinations project+env+region as JSON"
         required: true
         default: >        
           [
@@ -17,7 +17,7 @@ jobs:
   project-env-matrix:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 10
+      max-parallel: 5
       matrix:
         include: ${{ fromJSON(github.event.inputs.matrix_list) }}
 
