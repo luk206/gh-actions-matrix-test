@@ -1,0 +1,35 @@
+name: Projects Matrix Simple
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_env_map:
+        description: "JSON de proyectos y entornos"
+        required: false
+        default: '{"1000-5":["dev","mlops","prd"],"1000-6":["dev","prd"]}'
+      exclude_list:
+        description: "Lista de combos project:env a excluir"
+        required: false
+        default: '1000-5:mlops'
+
+jobs:
+  project-env-loop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate combos and run
+        run: |
+          PROJECTS="${{ github.event.inputs.project_env_map }}"
+          EXCLUDES="${{ github.event.inputs.exclude_list }}"
+
+          for project in $(echo "$PROJECTS" | jq -r 'keys[]'); do
+            envs=$(echo "$PROJECTS" | jq -r --arg p "$project" '.[$p][]')
+            for env in $envs; do
+              KEY="$project:$env"
+              if echo "$EXCLUDES" | grep -q "$KEY"; then
+                echo "Skipping $KEY"
+                continue
+              fi
+              echo "Running project $project env $env region eu-west-1"
+              sleep 1
+            done
+          done
