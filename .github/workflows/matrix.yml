@@ -1,12 +1,16 @@
-name: Simple Matrix
+name: Simple Matrix with Exclude
 
 on:
   workflow_dispatch:
     inputs:
       env_list:
-        description: "Lista de entornos en formato JSON (ej: [\"dev1\",\"dev2\"]). Vacío para usar todos por defecto."
+        description: "Lista de entornos en JSON (ej: [\"dev1\",\"dev2\"])"
         required: false
-        default: '["dev1","dev2","dev3","dev4","dev5","dev6","dev7","dev8","dev9","dev11","dev12","dev13","dev14","dev15","dev16","dev17","dev18","dev19"]'
+        default: '["dev1","dev2","dev3","dev4","dev5"]'
+      exclude_list:
+        description: "Lista de entornos a excluir en JSON (ej: [\"dev3\",\"dev5\"])"
+        required: false
+        default: '[]'
 
 jobs:
   test-matrix:
@@ -15,8 +19,7 @@ jobs:
       max-parallel: 4
       matrix:
         env: ${{ fromJSON(github.event.inputs.env_list) }}
+        exclude: ${{ fromJSON(github.event.inputs.exclude_list) }}
     steps:
       - name: Show matrix values
-        run: |
-          sleep 10
-          echo "Environment: ${{ matrix.env }}"
+        run: echo "Environment: ${{ matrix.env }}"
