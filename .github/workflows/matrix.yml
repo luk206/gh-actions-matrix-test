@@ -6,60 +6,27 @@ on:
       matrix_list:
         description: "Lista de combinaciones project+env como JSON"
         required: true
-        default: >
+        default: > 
           [
-            {"project":"proj1","env":"dev"},
-            {"project":"proj2","env":"dev"},{"project":"proj2","env":"prod"},
-            {"project":"proj3","env":"dev"},{"project":"proj3","env":"prod"},{"project":"proj3","env":"test"},
-            {"project":"proj4","env":"dev"},
-            {"project":"proj5","env":"dev"},{"project":"proj5","env":"prod"},
-            {"project":"proj6","env":"dev"},{"project":"proj6","env":"prod"},{"project":"proj6","env":"test"},
-            {"project":"proj7","env":"dev"},
-            {"project":"proj8","env":"dev"},{"project":"proj8","env":"prod"},
-            {"project":"proj9","env":"dev"},{"project":"proj9","env":"prod"},{"project":"proj9","env":"test"},
-            {"project":"proj10","env":"dev"},
-            {"project":"proj11","env":"dev"},{"project":"proj11","env":"prod"},
-            {"project":"proj12","env":"dev"},{"project":"proj12","env":"prod"},{"project":"proj12","env":"test"},
-            {"project":"proj13","env":"dev"},
-            {"project":"proj14","env":"dev"},{"project":"proj14","env":"prod"},
-            {"project":"proj15","env":"dev"},{"project":"proj15","env":"prod"},{"project":"proj15","env":"test"},
-            {"project":"proj16","env":"dev"},
-            {"project":"proj17","env":"dev"},{"project":"proj17","env":"prod"},
-            {"project":"proj18","env":"dev"},{"project":"proj18","env":"prod"},{"project":"proj18","env":"test"},
-            {"project":"proj19","env":"dev"},
-            {"project":"proj20","env":"dev"},{"project":"proj20","env":"prod"},
-            {"project":"proj21","env":"dev"},{"project":"proj21","env":"prod"},{"project":"proj21","env":"test"},
-            {"project":"proj22","env":"dev"},
-            {"project":"proj23","env":"dev"},{"project":"proj23","env":"prod"},
-            {"project":"proj24","env":"dev"},{"project":"proj24","env":"prod"},{"project":"proj24","env":"test"},
-            {"project":"proj25","env":"dev"},
-            {"project":"proj26","env":"dev"},{"project":"proj26","env":"prod"},
-            {"project":"proj27","env":"dev"},{"project":"proj27","env":"prod"},{"project":"proj27","env":"test"},
-            {"project":"proj28","env":"dev"},
-            {"project":"proj29","env":"dev"},{"project":"proj29","env":"prod"},
-            {"project":"proj30","env":"dev"},{"project":"proj30","env":"prod"},{"project":"proj30","env":"test"},
-            {"project":"proj31","env":"dev"},
-            {"project":"proj32","env":"dev"},{"project":"proj32","env":"prod"},
-            {"project":"proj33","env":"dev"},{"project":"proj33","env":"prod"},{"project":"proj33","env":"test"},
-            {"project":"proj34","env":"dev"},
-            {"project":"proj35","env":"dev"},{"project":"proj35","env":"prod"},
-            {"project":"proj36","env":"dev"},{"project":"proj36","env":"prod"},{"project":"proj36","env":"test"},
-            {"project":"proj37","env":"dev"},
-            {"project":"proj38","env":"dev"},{"project":"proj38","env":"prod"},
-            {"project":"proj39","env":"dev"},{"project":"proj39","env":"prod"},{"project":"proj39","env":"test"},
-            {"project":"proj40","env":"dev"},
-            {"project":"proj41","env":"dev"},{"project":"proj41","env":"prod"},
-            {"project":"proj42","env":"dev"},{"project":"proj42","env":"prod"},{"project":"proj42","env":"test"},
-            {"project":"proj43","env":"dev"},
-            {"project":"proj44","env":"dev"},{"project":"proj44","env":"prod"},
-            {"project":"proj45","env":"dev"},{"project":"proj45","env":"prod"},{"project":"proj45","env":"test"},
-            {"project":"proj46","env":"dev"},
-            {"project":"proj47","env":"dev"},{"project":"proj47","env":"prod"},
-            {"project":"proj48","env":"dev"},{"project":"proj48","env":"prod"},{"project":"proj48","env":"test"},
-            {"project":"proj49","env":"dev"},
-            {"project":"proj50","env":"dev"},{"project":"proj50","env":"prod"}
+            {"project": "azmlops-1000-533-env-dev", "env": "dev", "region": "eu-west-1"},
+            {"project": "azmlops-1000-537-env-dev", "env": "dev", "region": "eu-west-1"},
+            {"project": "azmlops-1000-538-env-dev", "env": "dev", "region": "eu-west-1"},
+            {"project": "azmlops-1000-540-env-dev", "env": "dev", "region": "eu-west-1"},
+            {"project": "azmlops-1000-541-env-dev", "env": "dev", "region": "eu-west-1"},
+            {"project": "azmlops-1000-541-env-mlops", "env": "mlops", "region": "eu-west-1"},
+            {"project": "azmlops-1000-542-env-dev", "env": "dev", "region": "eu-west-1"},
+            {"project": "azmlops-1000-545-env-dev", "env": "dev", "region": "eu-west-1"},
+            {"project": "azmlops-1000-549-env-dev", "env": "dev", "region": "eu-west-1"},
+            {"project": "azmlops-1000-549-env-prd", "env": "prd", "region": "eu-west-1"},
+            {"project": "azmlops-1000-550-env-dev", "env": "dev", "region": "eu-west-1"},
+            {"project": "azmlops-1000-551-env-dev", "env": "dev", "region": "eu-west-1"},
+            {"project": "azmlops-1000-552-env-dev", "env": "dev", "region": "eu-west-1"},
+            {"project": "azmlops-1000-552-env-prd", "env": "prd", "region": "eu-west-1"},
+            {"project": "azmlops-1000-553-env-dev", "env": "dev", "region": "eu-west-1"},
+            {"project": "azmlops-1000-553-env-ppt", "env": "ppt", "region": "eu-west-1"},
+            {"project": "azmlops-1000-553-env-prd", "env": "prd", "region": "eu-west-1"},
           ]
-
+                
 jobs:
   project-env-matrix:
     runs-on: ubuntu-latest
@@ -73,4 +40,5 @@ jobs:
         run: |
           echo "Project: ${{ matrix.project }}"
           echo "Environment: ${{ matrix.env }}"
+          echo "Region: ${{ matrix.region }}"
           sleep 1
