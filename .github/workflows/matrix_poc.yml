@@ -54,14 +54,3 @@ jobs:
       - name: Step 3 (plan)
         if: ${{ steps.check.outputs.skip != 'true' }}
         run: echo "Plan 3 -> ${{ matrix.project }}:${{ matrix.env }}"
-
-      # APPLY (solo si pasó el plan del mismo combo)
-      - name: Step 4 (apply)
-        if: ${{ steps.check.outputs.skip != 'true' }}
-        run: echo "Apply 4 -> ${{ matrix.project }}:${{ matrix.env }}"
-      - name: Step 5 (apply)
-        if: ${{ steps.check.outputs.skip != 'true' }}
-        run: echo "Apply 5 -> ${{ matrix.project }}:${{ matrix.env }}"
-      - name: Step 6 (apply)
-        if: ${{ steps.check.outputs.skip != 'true' }}
-        run: echo "Apply 6 -> ${{ matrix.project }}:${{ matrix.env }}"
