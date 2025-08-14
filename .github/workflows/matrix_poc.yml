@@ -20,13 +20,13 @@ on:
         default: '["1000-5:mlops","1000-6:dev"]'
 
 jobs:
+  # Genera un job plan para cada combo
   plan:
+    name: plan-${{ matrix.project }}-${{ matrix.env }}
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 5
       matrix:
         include: ${{ fromJSON(github.event.inputs.matrix_list) }}
-
     steps:
       - name: Check if excluded
         id: check_exclude
@@ -43,26 +43,18 @@ jobs:
           done
           echo "skip=$SKIP" >> $GITHUB_OUTPUT
 
-      - name: Step 1
+      - name: Plan step
         if: ${{ steps.check_exclude.outputs.skip != 'true' }}
-        run: echo "Running Step 1 for ${{ matrix.project }}:${{ matrix.env }}"
+        run: echo "Planning for ${{ matrix.project }}:${{ matrix.env }}"
 
-      - name: Step 2
-        if: ${{ steps.check_exclude.outputs.skip != 'true' }}
-        run: echo "Running Step 2 for ${{ matrix.project }}:${{ matrix.env }}"
-
-      - name: Step 3
-        if: ${{ steps.check_exclude.outputs.skip != 'true' }}
-        run: echo "Running Step 3 for ${{ matrix.project }}:${{ matrix.env }}"
-
+  # Genera un job apply para cada combo y depende de su plan equivalente
   apply:
-    needs: plan  
+    name: apply-${{ matrix.project }}-${{ matrix.env }}
+    needs: [plan] # GitHub entiende que es el plan con el mismo matrix
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 5
       matrix:
         include: ${{ fromJSON(github.event.inputs.matrix_list) }}
-
     steps:
       - name: Check if excluded
         id: check_exclude
@@ -79,15 +71,6 @@ jobs:
           done
           echo "skip=$SKIP" >> $GITHUB_OUTPUT
 
-      - name: Step 4
+      - name: Apply step
         if: ${{ steps.check_exclude.outputs.skip != 'true' }}
-        run: echo "Running Step 1 for ${{ matrix.project }}:${{ matrix.env }}"
-
-      - name: Step 5
-        if: ${{ steps.check_exclude.outputs.skip != 'true' }}
-        run: echo "Running Step 2 for ${{ matrix.project }}:${{ matrix.env }}"
-
-      - name: Step 6
-        if: ${{ steps.check_exclude.outputs.skip != 'true' }}
-        run: echo "Running Step 3 for ${{ matrix.project }}:${{ matrix.env }}"
-        
+        run: echo "Applying for ${{ matrix.project }}:${{ matrix.env }}"
