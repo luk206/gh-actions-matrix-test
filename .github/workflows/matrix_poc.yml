@@ -25,6 +25,8 @@ jobs:
     strategy:
       matrix:
         include: ${{ fromJSON(github.event.inputs.matrix_list) }}
+    outputs:
+      plan_key: ${{ steps.set-output.outputs.key }}
     steps:
       - name: Check exclude
         id: check
@@ -39,6 +41,9 @@ jobs:
             fi
           done
           echo "skip=$SKIP" >> $GITHUB_OUTPUT
+          echo "key=$KEY" >> $GITHUB_OUTPUT
+        # Esto permite referenciar cada combinación después
+        id: set-output
 
       - name: Plan
         if: ${{ steps.check.outputs.skip != 'true' }}
@@ -54,5 +59,6 @@ jobs:
       name: approve-${{ matrix.project }}-${{ matrix.env }}
     steps:
       - name: Apply
-        run: echo "Apply -> ${{ matrix.project }}:${{ matrix.env }}"
-
+        run: |
+          KEY="${{ matrix.project }}:${{ matrix.env }}"
+          echo "Apply -> $KEY"
