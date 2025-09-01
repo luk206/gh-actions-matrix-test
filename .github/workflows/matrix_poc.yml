@@ -29,7 +29,6 @@ jobs:
       plan_key: ${{ steps.set-output.outputs.key }}
     steps:
       - name: Check exclude
-        id: check
         run: |
           EXCLUDES=$(echo '${{ github.event.inputs.exclude_list }}' | jq -r '.[]')
           KEY="${{ matrix.project }}:${{ matrix.env }}"
