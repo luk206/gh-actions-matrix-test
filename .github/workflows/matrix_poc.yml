@@ -46,7 +46,6 @@ jobs:
           done
           echo "skip=$SKIP" >> $GITHUB_OUTPUT
           echo "key=$KEY" >> $GITHUB_OUTPUT
-        id: set-output
 
       - name: Plan
         if: ${{ steps.check.outputs.skip != 'true' }}
