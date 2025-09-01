@@ -63,44 +63,28 @@ on:
         default: '["1000-5:mlops","1000-6:dev"]'
 
 jobs:
-  plan:
+  plan_1000_5_dev:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJSON(github.event.inputs.matrix_list) }}
     steps:
-      - name: Check exclude
-        id: check
-        run: |
-          EXCLUDES=$(echo '${{ github.event.inputs.exclude_list }}' | jq -r '.[]')
-          KEY="${{ matrix.project }}:${{ matrix.env }}"
-          SKIP=false
-          for ex in $EXCLUDES; do
-            if [ "$KEY" = "$ex" ]; then
-              SKIP=true
-              break
-            fi
-          done
-          echo "skip=$SKIP" >> $GITHUB_OUTPUT
+      - run: echo "Plan 1000-5:dev"
 
-      - name: Plan
-        if: ${{ steps.check.outputs.skip != 'true' }}
-        run: |
-          echo "Plan -> ${{ matrix.project }}:${{ matrix.env }}"
-          if [ "${{ matrix.project }}:${{ matrix.env }}" = "1000-5:prd" ]; then
-            exit 1
-
-  apply:
-    needs: plan
+  apply_1000_5_dev:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJSON(github.event.inputs.matrix_list) }}
-    if: ${{ needs.plan.result == 'success' }}   # solo si el plan correspondiente fue exitoso
-    environment:
-      name: approve-${{ matrix.project }}-${{ matrix.env }}
+    needs: plan_1000_5_dev
+    environment: approve-1000-5-dev
     steps:
-      - name: Apply
-        run: echo "Apply -> ${{ matrix.project }}:${{ matrix.env }}"
+      - run: echo "Apply 1000-5:dev"
+
+  plan_1000_5_prd:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Plan 1000-5:prd"
+          exit 1  # solo este plan falla
+
+  apply_1000_5_prd:
+    runs-on: ubuntu-latest
+    needs: plan_1000_5_prd
+    environment: approve-1000-5-prd
+    steps:
+      - run: echo "Apply 1000-5:prd"
