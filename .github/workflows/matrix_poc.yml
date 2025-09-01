@@ -63,6 +63,7 @@ on:
         default: '["1000-5:mlops","1000-6:dev"]'
 
 jobs:
+  # ------------------- Proyecto 1000-5 -------------------
   plan_1000_5_dev:
     runs-on: ubuntu-latest
     steps:
@@ -75,12 +76,24 @@ jobs:
     steps:
       - run: echo "Apply 1000-5:dev"
 
+  plan_1000_5_mlops:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Plan 1000-5:mlops"
+
+  apply_1000_5_mlops:
+    runs-on: ubuntu-latest
+    needs: plan_1000_5_mlops
+    environment: approve-1000-5-mlops
+    steps:
+      - run: echo "Apply 1000-5:mlops"
+
   plan_1000_5_prd:
     runs-on: ubuntu-latest
     steps:
       - run: |
           echo "Plan 1000-5:prd"
-          exit 1  # solo este plan falla
+          exit 1   # solo este plan falla
 
   apply_1000_5_prd:
     runs-on: ubuntu-latest
@@ -88,3 +101,77 @@ jobs:
     environment: approve-1000-5-prd
     steps:
       - run: echo "Apply 1000-5:prd"
+
+  # ------------------- Proyecto 1000-6 -------------------
+  plan_1000_6_dev:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Plan 1000-6:dev"
+
+  apply_1000_6_dev:
+    runs-on: ubuntu-latest
+    needs: plan_1000_6_dev
+    environment: approve-1000-6-dev
+    steps:
+      - run: echo "Apply 1000-6:dev"
+
+  plan_1000_6_mlops:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Plan 1000-6:mlops"
+
+  apply_1000_6_mlops:
+    runs-on: ubuntu-latest
+    needs: plan_1000_6_mlops
+    environment: approve-1000-6-mlops
+    steps:
+      - run: echo "Apply 1000-6:mlops"
+
+  plan_1000_6_prd:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Plan 1000-6:prd"
+
+  apply_1000_6_prd:
+    runs-on: ubuntu-latest
+    needs: plan_1000_6_prd
+    environment: approve-1000-6-prd
+    steps:
+      - run: echo "Apply 1000-6:prd"
+
+# ------------------- Proyecto 1000-7 -------------------
+  plan_1000_7_dev:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Plan 1000-7:dev"
+
+  apply_1000_7_dev:
+    runs-on: ubuntu-latest
+    needs: plan_1000_7_dev
+    environment: approve-1000-7-dev
+    steps:
+      - run: echo "Apply 1000-7:dev"
+
+  plan_1000_7_mlops:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Plan 1000-7:mlops"
+
+  apply_1000_7_mlops:
+    runs-on: ubuntu-latest
+    needs: plan_1000_7_mlops
+    environment: approve-1000-7-mlops
+    steps:
+      - run: echo "Apply 1000-7:mlops"
+
+  plan_1000_7_prd:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Plan 1000-7:prd"
+
+  apply_1000_7_prd:
+    runs-on: ubuntu-latest
+    needs: plan_1000_7_prd
+    environment: approve-1000-7-prd
+    steps:
+      - run: echo "Apply 1000-7:prd"
