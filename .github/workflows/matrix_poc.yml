@@ -89,7 +89,12 @@ jobs:
 
       - name: Plan
         if: ${{ steps.check.outputs.skip != 'true' }}
-        run: echo "Plan -> ${{ matrix.project }}:${{ matrix.env }}"
+        run: |
+            echo "Plan -> ${{ matrix.project }}:${{ matrix.env }}"
+            if [ "${{ matrix.project }}:${{ matrix.env }}" = "1000-5:prd" ]; then
+              echo "Forzando fallo en ${{ matrix.project }}:${{ matrix.env }}"
+              exit 1
+            fi        
 
   apply:
     needs: plan
