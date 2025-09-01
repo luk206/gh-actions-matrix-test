@@ -15,48 +15,9 @@ on:
             {"project": "1000-6", "env": "prd"},
             {"project": "1000-7", "env": "dev"},
             {"project": "1000-7", "env": "mlops"},
-            {"project": "1000-7", "env": "prd"},
-            {"project": "1000-8", "env": "dev"},
-            {"project": "1000-8", "env": "mlops"},
-            {"project": "1000-8", "env": "prd"},
-            {"project": "1000-9", "env": "dev"},
-            {"project": "1000-9", "env": "mlops"},
-            {"project": "1000-9", "env": "prd"},
-            {"project": "1000-10", "env": "dev"},
-            {"project": "1000-10", "env": "mlops"},
-            {"project": "1000-10", "env": "prd"},
-            {"project": "1000-11", "env": "dev"},
-            {"project": "1000-11", "env": "mlops"},
-            {"project": "1000-11", "env": "prd"},
-            {"project": "1000-12", "env": "dev"},
-            {"project": "1000-12", "env": "mlops"},
-            {"project": "1000-12", "env": "prd"},
-            {"project": "1000-13", "env": "dev"},
-            {"project": "1000-13", "env": "mlops"},
-            {"project": "1000-13", "env": "prd"},
-            {"project": "1000-14", "env": "dev"},
-            {"project": "1000-14", "env": "mlops"},
-            {"project": "1000-14", "env": "prd"},
-            {"project": "1000-15", "env": "dev"},
-            {"project": "1000-15", "env": "mlops"},
-            {"project": "1000-15", "env": "prd"},
-            {"project": "1000-16", "env": "dev"},
-            {"project": "1000-16", "env": "mlops"},
-            {"project": "1000-16", "env": "prd"},
-            {"project": "1000-17", "env": "dev"},
-            {"project": "1000-17", "env": "mlops"},
-            {"project": "1000-17", "env": "prd"},
-            {"project": "1000-18", "env": "dev"},
-            {"project": "1000-18", "env": "mlops"},
-            {"project": "1000-18", "env": "prd"},
-            {"project": "1000-19", "env": "dev"},
-            {"project": "1000-19", "env": "mlops"},
-            {"project": "1000-19", "env": "prd"},
-            {"project": "1000-20", "env": "dev"},
-            {"project": "1000-20", "env": "mlops"},
-            {"project": "1000-20", "env": "prd"}
+            {"project": "1000-7", "env": "prd"}
+            # ... sigue hasta 1000-56
           ]
-
       exclude_list:
         description: "Array of project:env combos to exclude"
         required: false
@@ -72,6 +33,7 @@ jobs:
       plan_key: ${{ steps.set-output.outputs.key }}
     steps:
       - name: Check exclude
+        id: check
         run: |
           EXCLUDES=$(echo '${{ github.event.inputs.exclude_list }}' | jq -r '.[]')
           KEY="${{ matrix.project }}:${{ matrix.env }}"
@@ -84,23 +46,33 @@ jobs:
           done
           echo "skip=$SKIP" >> $GITHUB_OUTPUT
           echo "key=$KEY" >> $GITHUB_OUTPUT
-        # Esto permite referenciar cada combinación después
         id: set-output
 
       - name: Plan
         if: ${{ steps.check.outputs.skip != 'true' }}
         run: echo "Plan -> ${{ matrix.project }}:${{ matrix.env }}"
 
-  apply:
+# APPLY individual por cada combinación
+  apply_1000_5_dev:
     needs: plan
+    if: ${{ fromJSON(github.event.inputs.matrix_list)[0].project == '1000-5' && fromJSON(github.event.inputs.matrix_list)[0].env == 'dev' }}
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include: ${{ fromJSON(github.event.inputs.matrix_list) }}
-    environment:
-      name: approve-${{ matrix.project }}-${{ matrix.env }}
+    environment: approve-1000-5-dev
     steps:
-      - name: Apply
-        run: |
-          KEY="${{ matrix.project }}:${{ matrix.env }}"
-          echo "Apply -> $KEY"
+      - run: echo "Apply 1000-5:dev"
+
+  apply_1000_5_prd:
+    needs: plan
+    if: ${{ fromJSON(github.event.inputs.matrix_list)[2].project == '1000-5' && fromJSON(github.event.inputs.matrix_list)[2].env == 'prd' }}
+    runs-on: ubuntu-latest
+    environment: approve-1000-5-prd
+    steps:
+      - run: echo "Apply 1000-5:prd"
+
+  apply_1000_6_prd:
+    needs: plan
+    if: ${{ fromJSON(github.event.inputs.matrix_list)[4].project == '1000-6' && fromJSON(github.event.inputs.matrix_list)[4].env == 'prd' }}
+    runs-on: ubuntu-latest
+    environment: approve-1000-6-prd
+    steps:
+      - run: echo "Apply 1000-6:prd"
