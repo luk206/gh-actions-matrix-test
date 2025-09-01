@@ -66,6 +66,7 @@ jobs:
   plan:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include: ${{ fromJSON(github.event.inputs.matrix_list) }}
     steps:
@@ -87,9 +88,7 @@ jobs:
         if: ${{ steps.check.outputs.skip != 'true' }}
         run: |
           echo "Plan -> ${{ matrix.project }}:${{ matrix.env }}"
-          # falla solo un plan concreto
           if [ "${{ matrix.project }}:${{ matrix.env }}" = "1000-5:prd" ]; then
             echo "Forzando fallo en ${{ matrix.project }}:${{ matrix.env }}"
             exit 1
           fi
-
