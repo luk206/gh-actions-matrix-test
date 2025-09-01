@@ -68,10 +68,9 @@ jobs:
     strategy:
       matrix:
         include: ${{ fromJSON(github.event.inputs.matrix_list) }}
-    outputs:
-      plan_key: ${{ steps.set-output.outputs.key }}
     steps:
       - name: Check exclude
+        id: check
         run: |
           EXCLUDES=$(echo '${{ github.event.inputs.exclude_list }}' | jq -r '.[]')
           KEY="${{ matrix.project }}:${{ matrix.env }}"
@@ -83,29 +82,14 @@ jobs:
             fi
           done
           echo "skip=$SKIP" >> $GITHUB_OUTPUT
-          echo "key=$KEY" >> $GITHUB_OUTPUT
-        # Esto permite referenciar cada combinación después
-        id: set-output
 
       - name: Plan
         if: ${{ steps.check.outputs.skip != 'true' }}
         run: |
-            echo "Plan -> ${{ matrix.project }}:${{ matrix.env }}"
-            if [ "${{ matrix.project }}:${{ matrix.env }}" = "1000-5:prd" ]; then
-              echo "Forzando fallo en ${{ matrix.project }}:${{ matrix.env }}"
-              exit 1
-            fi        
+          echo "Plan -> ${{ matrix.project }}:${{ matrix.env }}"
+          # falla solo un plan concreto
+          if [ "${{ matrix.project }}:${{ matrix.env }}" = "1000-5:prd" ]; then
+            echo "Forzando fallo en ${{ matrix.project }}:${{ matrix.env }}"
+            exit 1
+          fi
 
-  apply:
-    needs: plan
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include: ${{ fromJSON(github.event.inputs.matrix_list) }}
-    environment:
-      name: approve-${{ matrix.project }}-${{ matrix.env }}
-    steps:
-      - name: Apply
-        run: |
-          KEY="${{ matrix.project }}:${{ matrix.env }}"
-          echo "Apply -> $KEY"
