@@ -89,6 +89,18 @@ jobs:
         run: |
           echo "Plan -> ${{ matrix.project }}:${{ matrix.env }}"
           if [ "${{ matrix.project }}:${{ matrix.env }}" = "1000-5:prd" ]; then
-            echo "Forzando fallo en ${{ matrix.project }}:${{ matrix.env }}"
             exit 1
-          fi
+
+  apply:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(github.event.inputs.matrix_list) }}
+    if: ${{ needs.plan.result == 'success' }}   # solo si el plan correspondiente fue exitoso
+    environment:
+      name: approve-${{ matrix.project }}-${{ matrix.env }}
+    steps:
+      - name: Apply
+        run: echo "Apply -> ${{ matrix.project }}:${{ matrix.env }}"
