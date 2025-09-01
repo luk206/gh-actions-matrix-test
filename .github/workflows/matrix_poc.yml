@@ -20,14 +20,11 @@ on:
         default: '["1000-5:mlops","1000-6:dev"]'
 
 jobs:
-  plan_and_apply:
-    name: ${{ matrix.project }}-${{ matrix.env }}
+  plan:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 5
       matrix:
         include: ${{ fromJSON(github.event.inputs.matrix_list) }}
-
     steps:
       - name: Check exclude
         id: check
@@ -37,20 +34,25 @@ jobs:
           SKIP=false
           for ex in $EXCLUDES; do
             if [ "$KEY" = "$ex" ]; then
-              echo "Excluded: $KEY"
               SKIP=true
               break
             fi
           done
           echo "skip=$SKIP" >> $GITHUB_OUTPUT
 
-      # PLAN
-      - name: Step 1 (plan)
+      - name: Plan
         if: ${{ steps.check.outputs.skip != 'true' }}
-        run: echo "Plan 1 -> ${{ matrix.project }}:${{ matrix.env }}"
-      - name: Step 2 (plan)
-        if: ${{ steps.check.outputs.skip != 'true' }}
-        run: echo "Plan 2 -> ${{ matrix.project }}:${{ matrix.env }}"
-      - name: Step 3 (plan)
-        if: ${{ steps.check.outputs.skip != 'true' }}
-        run: echo "Plan 3 -> ${{ matrix.project }}:${{ matrix.env }}"
+        run: echo "Plan -> ${{ matrix.project }}:${{ matrix.env }}"
+
+  apply:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include: ${{ fromJSON(github.event.inputs.matrix_list) }}
+    environment:
+      name: approve-${{ matrix.project }}-${{ matrix.env }}
+    steps:
+      - name: Apply
+        run: echo "Apply -> ${{ matrix.project }}:${{ matrix.env }}"
+
