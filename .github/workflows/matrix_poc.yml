@@ -5,12 +5,12 @@ on:
     inputs:
       projects:
         description: "Projects to deploy (comma-separated, e.g., 1000-5,1000-6,1000-7)"
-        required: true
+        required: false
         default: "1000-5,1000-6,1000-7,1000-8,1000-9"
       
       environments:
         description: "Environments to deploy (comma-separated, e.g., dev,mlops,prd)"
-        required: true
+        required: false
         default: "dev,mlops,prd"
       
       exclude:
@@ -19,118 +19,349 @@ on:
         default: "1000-5:mlops,1000-6:dev"
 
 jobs:
-  prepare:
+  # 1000-5:dev
+  plan_1000-5_dev:
     runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    if: |
+      contains(github.event.inputs.projects, '1000-5') &&
+      contains(github.event.inputs.environments, 'dev') &&
+      !contains(github.event.inputs.exclude, '1000-5:dev')
     steps:
-      - name: Build matrix
-        id: set-matrix
-        run: |
-          # Convertir inputs en arrays
-          IFS=',' read -ra PROJECTS <<< "${{ github.event.inputs.projects }}"
-          IFS=',' read -ra ENVS <<< "${{ github.event.inputs.environments }}"
-          IFS=',' read -ra EXCLUDES <<< "${{ github.event.inputs.exclude }}"
-          
-          # Construir JSON array
-          echo '{"include":[' > matrix.json
-          first=true
-          
-          for project in "${PROJECTS[@]}"; do
-            project=$(echo "$project" | xargs)  # trim whitespace
-            for env in "${ENVS[@]}"; do
-              env=$(echo "$env" | xargs)  # trim whitespace
-              combo="${project}:${env}"
-              
-              # Verificar si está en exclusiones
-              excluded=false
-              for excl in "${EXCLUDES[@]}"; do
-                excl=$(echo "$excl" | xargs)
-                if [[ "$combo" == "$excl" ]]; then
-                  excluded=true
-                  break
-                fi
-              done
-              
-              if [[ "$excluded" == "false" ]]; then
-                if [[ "$first" == "false" ]]; then
-                  echo ',' >> matrix.json
-                fi
-                echo -n "{\"project\":\"${project}\",\"env\":\"${env}\"}" >> matrix.json
-                first=false
-              fi
-            done
-          done
-          
-          echo ']}' >> matrix.json
-          
-          # Output
-          cat matrix.json
-          echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
+      - name: Plan 1000-5:dev
+        run: echo "Plan 1000-5:dev"
 
-  plan:
-    needs: prepare
+  apply_1000-5_dev:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    needs: plan_1000-5_dev
+    if: |
+      contains(github.event.inputs.projects, '1000-5') &&
+      contains(github.event.inputs.environments, 'dev') &&
+      !contains(github.event.inputs.exclude, '1000-5:dev')
+    environment: approve-1000-5-dev
     steps:
-      - name: Plan ${{ matrix.project }}:${{ matrix.env }}
-        id: plan
-        run: |
-          echo "Running plan for ${{ matrix.project }}:${{ matrix.env }}"
-          
-          # Simular fallo para 1000-5:prd
-          if [[ "${{ matrix.project }}" == "1000-5" && "${{ matrix.env }}" == "prd" ]]; then
-            echo "::error::Plan failed for 1000-5:prd"
-            exit 1
-          fi
-          
-          echo "Plan completed successfully"
-      
-      - name: Save plan status
-        if: always()
-        run: |
-          mkdir -p plan-status
-          if [[ "${{ steps.plan.outcome }}" == "success" ]]; then
-            echo "success" > plan-status/${{ matrix.project }}-${{ matrix.env }}.txt
-          else
-            echo "failure" > plan-status/${{ matrix.project }}-${{ matrix.env }}.txt
-          fi
-      
-      - name: Upload plan status
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: plan-status-${{ matrix.project }}-${{ matrix.env }}
-          path: plan-status/${{ matrix.project }}-${{ matrix.env }}.txt
-          retention-days: 1
+      - name: Apply 1000-5:dev
+        run: echo "Apply 1000-5:dev"
 
-  apply:
-    needs: [prepare, plan]
-    if: always()
+  # 1000-5:mlops
+  plan_1000-5_mlops:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
-    environment: approve-${{ matrix.project }}-${{ matrix.env }}
+    if: |
+      contains(github.event.inputs.projects, '1000-5') &&
+      contains(github.event.inputs.environments, 'mlops') &&
+      !contains(github.event.inputs.exclude, '1000-5:mlops')
     steps:
-      - name: Download plan status
-        uses: actions/download-artifact@v4
-        with:
-          name: plan-status-${{ matrix.project }}-${{ matrix.env }}
-          path: plan-status
-      
-      - name: Check plan status and apply
+      - name: Plan 1000-5:mlops
+        run: echo "Plan 1000-5:mlops"
+
+  apply_1000-5_mlops:
+    runs-on: ubuntu-latest
+    needs: plan_1000-5_mlops
+    if: |
+      contains(github.event.inputs.projects, '1000-5') &&
+      contains(github.event.inputs.environments, 'mlops') &&
+      !contains(github.event.inputs.exclude, '1000-5:mlops')
+    environment: approve-1000-5-mlops
+    steps:
+      - name: Apply 1000-5:mlops
+        run: echo "Apply 1000-5:mlops"
+
+  # 1000-5:prd
+  plan_1000-5_prd:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.inputs.projects, '1000-5') &&
+      contains(github.event.inputs.environments, 'prd') &&
+      !contains(github.event.inputs.exclude, '1000-5:prd')
+    steps:
+      - name: Plan 1000-5:prd
         run: |
-          PLAN_STATUS=$(cat plan-status/${{ matrix.project }}-${{ matrix.env }}.txt)
-          
-          echo "Plan status for ${{ matrix.project }}:${{ matrix.env }} = $PLAN_STATUS"
-          
-          if [[ "$PLAN_STATUS" != "success" ]]; then
-            echo "::warning::Plan failed for ${{ matrix.project }}:${{ matrix.env }}, skipping apply"
-            exit 1
-          fi
-          
-          echo "Applying ${{ matrix.project }}:${{ matrix.env }}"
-          # Aquí va tu lógica de apply
+          echo "Plan 1000-5:prd"
+          exit 1  # Este plan falla intencionalmente
+
+  apply_1000-5_prd:
+    runs-on: ubuntu-latest
+    needs: plan_1000-5_prd
+    if: |
+      contains(github.event.inputs.projects, '1000-5') &&
+      contains(github.event.inputs.environments, 'prd') &&
+      !contains(github.event.inputs.exclude, '1000-5:prd')
+    environment: approve-1000-5-prd
+    steps:
+      - name: Apply 1000-5:prd
+        run: echo "Apply 1000-5:prd"
+
+  # 1000-6:dev
+  plan_1000-6_dev:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.inputs.projects, '1000-6') &&
+      contains(github.event.inputs.environments, 'dev') &&
+      !contains(github.event.inputs.exclude, '1000-6:dev')
+    steps:
+      - name: Plan 1000-6:dev
+        run: echo "Plan 1000-6:dev"
+
+  apply_1000-6_dev:
+    runs-on: ubuntu-latest
+    needs: plan_1000-6_dev
+    if: |
+      contains(github.event.inputs.projects, '1000-6') &&
+      contains(github.event.inputs.environments, 'dev') &&
+      !contains(github.event.inputs.exclude, '1000-6:dev')
+    environment: approve-1000-6-dev
+    steps:
+      - name: Apply 1000-6:dev
+        run: echo "Apply 1000-6:dev"
+
+  # 1000-6:mlops
+  plan_1000-6_mlops:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.inputs.projects, '1000-6') &&
+      contains(github.event.inputs.environments, 'mlops') &&
+      !contains(github.event.inputs.exclude, '1000-6:mlops')
+    steps:
+      - name: Plan 1000-6:mlops
+        run: echo "Plan 1000-6:mlops"
+
+  apply_1000-6_mlops:
+    runs-on: ubuntu-latest
+    needs: plan_1000-6_mlops
+    if: |
+      contains(github.event.inputs.projects, '1000-6') &&
+      contains(github.event.inputs.environments, 'mlops') &&
+      !contains(github.event.inputs.exclude, '1000-6:mlops')
+    environment: approve-1000-6-mlops
+    steps:
+      - name: Apply 1000-6:mlops
+        run: echo "Apply 1000-6:mlops"
+
+  # 1000-6:prd
+  plan_1000-6_prd:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.inputs.projects, '1000-6') &&
+      contains(github.event.inputs.environments, 'prd') &&
+      !contains(github.event.inputs.exclude, '1000-6:prd')
+    steps:
+      - name: Plan 1000-6:prd
+        run: echo "Plan 1000-6:prd"
+
+  apply_1000-6_prd:
+    runs-on: ubuntu-latest
+    needs: plan_1000-6_prd
+    if: |
+      contains(github.event.inputs.projects, '1000-6') &&
+      contains(github.event.inputs.environments, 'prd') &&
+      !contains(github.event.inputs.exclude, '1000-6:prd')
+    environment: approve-1000-6-prd
+    steps:
+      - name: Apply 1000-6:prd
+        run: echo "Apply 1000-6:prd"
+
+  # 1000-7:dev
+  plan_1000-7_dev:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.inputs.projects, '1000-7') &&
+      contains(github.event.inputs.environments, 'dev') &&
+      !contains(github.event.inputs.exclude, '1000-7:dev')
+    steps:
+      - name: Plan 1000-7:dev
+        run: echo "Plan 1000-7:dev"
+
+  apply_1000-7_dev:
+    runs-on: ubuntu-latest
+    needs: plan_1000-7_dev
+    if: |
+      contains(github.event.inputs.projects, '1000-7') &&
+      contains(github.event.inputs.environments, 'dev') &&
+      !contains(github.event.inputs.exclude, '1000-7:dev')
+    environment: approve-1000-7-dev
+    steps:
+      - name: Apply 1000-7:dev
+        run: echo "Apply 1000-7:dev"
+
+  # 1000-7:mlops
+  plan_1000-7_mlops:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.inputs.projects, '1000-7') &&
+      contains(github.event.inputs.environments, 'mlops') &&
+      !contains(github.event.inputs.exclude, '1000-7:mlops')
+    steps:
+      - name: Plan 1000-7:mlops
+        run: echo "Plan 1000-7:mlops"
+
+  apply_1000-7_mlops:
+    runs-on: ubuntu-latest
+    needs: plan_1000-7_mlops
+    if: |
+      contains(github.event.inputs.projects, '1000-7') &&
+      contains(github.event.inputs.environments, 'mlops') &&
+      !contains(github.event.inputs.exclude, '1000-7:mlops')
+    environment: approve-1000-7-mlops
+    steps:
+      - name: Apply 1000-7:mlops
+        run: echo "Apply 1000-7:mlops"
+
+  # 1000-7:prd
+  plan_1000-7_prd:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.inputs.projects, '1000-7') &&
+      contains(github.event.inputs.environments, 'prd') &&
+      !contains(github.event.inputs.exclude, '1000-7:prd')
+    steps:
+      - name: Plan 1000-7:prd
+        run: echo "Plan 1000-7:prd"
+
+  apply_1000-7_prd:
+    runs-on: ubuntu-latest
+    needs: plan_1000-7_prd
+    if: |
+      contains(github.event.inputs.projects, '1000-7') &&
+      contains(github.event.inputs.environments, 'prd') &&
+      !contains(github.event.inputs.exclude, '1000-7:prd')
+    environment: approve-1000-7-prd
+    steps:
+      - name: Apply 1000-7:prd
+        run: echo "Apply 1000-7:prd"
+
+  # 1000-8:dev
+  plan_1000-8_dev:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.inputs.projects, '1000-8') &&
+      contains(github.event.inputs.environments, 'dev') &&
+      !contains(github.event.inputs.exclude, '1000-8:dev')
+    steps:
+      - name: Plan 1000-8:dev
+        run: echo "Plan 1000-8:dev"
+
+  apply_1000-8_dev:
+    runs-on: ubuntu-latest
+    needs: plan_1000-8_dev
+    if: |
+      contains(github.event.inputs.projects, '1000-8') &&
+      contains(github.event.inputs.environments, 'dev') &&
+      !contains(github.event.inputs.exclude, '1000-8:dev')
+    environment: approve-1000-8-dev
+    steps:
+      - name: Apply 1000-8:dev
+        run: echo "Apply 1000-8:dev"
+
+  # 1000-8:mlops
+  plan_1000-8_mlops:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.inputs.projects, '1000-8') &&
+      contains(github.event.inputs.environments, 'mlops') &&
+      !contains(github.event.inputs.exclude, '1000-8:mlops')
+    steps:
+      - name: Plan 1000-8:mlops
+        run: echo "Plan 1000-8:mlops"
+
+  apply_1000-8_mlops:
+    runs-on: ubuntu-latest
+    needs: plan_1000-8_mlops
+    if: |
+      contains(github.event.inputs.projects, '1000-8') &&
+      contains(github.event.inputs.environments, 'mlops') &&
+      !contains(github.event.inputs.exclude, '1000-8:mlops')
+    environment: approve-1000-8-mlops
+    steps:
+      - name: Apply 1000-8:mlops
+        run: echo "Apply 1000-8:mlops"
+
+  # 1000-8:prd
+  plan_1000-8_prd:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.inputs.projects, '1000-8') &&
+      contains(github.event.inputs.environments, 'prd') &&
+      !contains(github.event.inputs.exclude, '1000-8:prd')
+    steps:
+      - name: Plan 1000-8:prd
+        run: echo "Plan 1000-8:prd"
+
+  apply_1000-8_prd:
+    runs-on: ubuntu-latest
+    needs: plan_1000-8_prd
+    if: |
+      contains(github.event.inputs.projects, '1000-8') &&
+      contains(github.event.inputs.environments, 'prd') &&
+      !contains(github.event.inputs.exclude, '1000-8:prd')
+    environment: approve-1000-8-prd
+    steps:
+      - name: Apply 1000-8:prd
+        run: echo "Apply 1000-8:prd"
+
+  # 1000-9:dev
+  plan_1000-9_dev:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.inputs.projects, '1000-9') &&
+      contains(github.event.inputs.environments, 'dev') &&
+      !contains(github.event.inputs.exclude, '1000-9:dev')
+    steps:
+      - name: Plan 1000-9:dev
+        run: echo "Plan 1000-9:dev"
+
+  apply_1000-9_dev:
+    runs-on: ubuntu-latest
+    needs: plan_1000-9_dev
+    if: |
+      contains(github.event.inputs.projects, '1000-9') &&
+      contains(github.event.inputs.environments, 'dev') &&
+      !contains(github.event.inputs.exclude, '1000-9:dev')
+    environment: approve-1000-9-dev
+    steps:
+      - name: Apply 1000-9:dev
+        run: echo "Apply 1000-9:dev"
+
+  # 1000-9:mlops
+  plan_1000-9_mlops:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.inputs.projects, '1000-9') &&
+      contains(github.event.inputs.environments, 'mlops') &&
+      !contains(github.event.inputs.exclude, '1000-9:mlops')
+    steps:
+      - name: Plan 1000-9:mlops
+        run: echo "Plan 1000-9:mlops"
+
+  apply_1000-9_mlops:
+    runs-on: ubuntu-latest
+    needs: plan_1000-9_mlops
+    if: |
+      contains(github.event.inputs.projects, '1000-9') &&
+      contains(github.event.inputs.environments, 'mlops') &&
+      !contains(github.event.inputs.exclude, '1000-9:mlops')
+    environment: approve-1000-9-mlops
+    steps:
+      - name: Apply 1000-9:mlops
+        run: echo "Apply 1000-9:mlops"
+
+  # 1000-9:prd
+  plan_1000-9_prd:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.inputs.projects, '1000-9') &&
+      contains(github.event.inputs.environments, 'prd') &&
+      !contains(github.event.inputs.exclude, '1000-9:prd')
+    steps:
+      - name: Plan 1000-9:prd
+        run: echo "Plan 1000-9:prd"
+
+  apply_1000-9_prd:
+    runs-on: ubuntu-latest
+    needs: plan_1000-9_prd
+    if: |
+      contains(github.event.inputs.projects, '1000-9') &&
+      contains(github.event.inputs.environments, 'prd') &&
+      !contains(github.event.inputs.exclude, '1000-9:prd')
+    environment: approve-1000-9-prd
+    steps:
+      - name: Apply 1000-9:prd
+        run: echo "Apply 1000-9:prd"
