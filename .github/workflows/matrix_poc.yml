@@ -3,126 +3,134 @@ name: Projects Matrix PoC
 on:
   workflow_dispatch:
     inputs:
-      matrix_list:
-        description: "List of project+env combinations as JSON"
+      projects:
+        description: "Projects to deploy (comma-separated, e.g., 1000-5,1000-6,1000-7)"
         required: true
-        default: '[{"project":"1000-5","env":"dev"},{"project":"1000-5","env":"mlops"},{"project":"1000-5","env":"prd"},{"project":"1000-6","env":"dev"},{"project":"1000-6","env":"prd"},{"project":"1000-7","env":"dev"},{"project":"1000-7","env":"mlops"},{"project":"1000-7","env":"prd"},{"project":"1000-8","env":"dev"},{"project":"1000-8","env":"mlops"},{"project":"1000-8","env":"prd"},{"project":"1000-9","env":"dev"},{"project":"1000-9","env":"mlops"},{"project":"1000-9","env":"prd"}]'
-
-      exclude_list:
-        description: "Array of project:env combos to exclude"
+        default: "1000-5,1000-6,1000-7,1000-8,1000-9"
+      
+      environments:
+        description: "Environments to deploy (comma-separated, e.g., dev,mlops,prd)"
+        required: true
+        default: "dev,mlops,prd"
+      
+      exclude:
+        description: "Exclude combinations (comma-separated, e.g., 1000-5:mlops,1000-6:dev)"
         required: false
-        default: '["1000-5:mlops","1000-6:dev"]'
+        default: "1000-5:mlops,1000-6:dev"
 
 jobs:
-  build-matrix:
+  prepare:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.filter-matrix.outputs.matrix }}
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - name: Filter matrix based on exclusions
-        id: filter-matrix
+      - name: Build matrix
+        id: set-matrix
         run: |
-          cat > filter.py << 'PYTHON_SCRIPT'
-          import json
-          import os
-          import sys
+          # Convertir inputs en arrays
+          IFS=',' read -ra PROJECTS <<< "${{ github.event.inputs.projects }}"
+          IFS=',' read -ra ENVS <<< "${{ github.event.inputs.environments }}"
+          IFS=',' read -ra EXCLUDES <<< "${{ github.event.inputs.exclude }}"
           
-          # Parse inputs - strip whitespace and newlines
-          matrix_str = os.environ['MATRIX_LIST'].strip().replace('\n', '').replace('\r', '')
-          exclude_str = os.environ['EXCLUDE_LIST'].strip().replace('\n', '').replace('\r', '')
+          # Construir JSON array
+          echo '{"include":[' > matrix.json
+          first=true
           
-          # Debug: print raw inputs
-          print(f"Raw matrix input length: {len(matrix_str)}", file=sys.stderr)
-          print(f"Raw exclude input length: {len(exclude_str)}", file=sys.stderr)
+          for project in "${PROJECTS[@]}"; do
+            project=$(echo "$project" | xargs)  # trim whitespace
+            for env in "${ENVS[@]}"; do
+              env=$(echo "$env" | xargs)  # trim whitespace
+              combo="${project}:${env}"
+              
+              # Verificar si está en exclusiones
+              excluded=false
+              for excl in "${EXCLUDES[@]}"; do
+                excl=$(echo "$excl" | xargs)
+                if [[ "$combo" == "$excl" ]]; then
+                  excluded=true
+                  break
+                fi
+              done
+              
+              if [[ "$excluded" == "false" ]]; then
+                if [[ "$first" == "false" ]]; then
+                  echo ',' >> matrix.json
+                fi
+                echo -n "{\"project\":\"${project}\",\"env\":\"${env}\"}" >> matrix.json
+                first=false
+              fi
+            done
+          done
           
-          try:
-              matrix_input = json.loads(matrix_str)
-              exclude_input = json.loads(exclude_str)
-          except json.JSONDecodeError as e:
-              print(f"JSON Parse Error: {e}", file=sys.stderr)
-              print(f"Matrix string: {matrix_str[:100]}...", file=sys.stderr)
-              print(f"Exclude string: {exclude_str}", file=sys.stderr)
-              sys.exit(1)
+          echo ']}' >> matrix.json
           
-          # Create set of exclusions for fast lookup
-          exclude_set = set(exclude_input)
-          
-          # Filter matrix
-          filtered = []
-          for item in matrix_input:
-              combo = f"{item['project']}:{item['env']}"
-              if combo not in exclude_set:
-                  filtered.append(item)
-          
-          # Output in GitHub Actions matrix format
-          result = {"include": filtered}
-          print(f"Filtered {len(filtered)} combinations from {len(matrix_input)} total", file=sys.stderr)
-          
-          # Set output using new GitHub Actions format
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
-              f.write(f"matrix={json.dumps(result)}\n")
-          PYTHON_SCRIPT
-          
-          python3 filter.py
-        env:
-          MATRIX_LIST: ${{ github.event.inputs.matrix_list }}
-          EXCLUDE_LIST: ${{ github.event.inputs.exclude_list }}
+          # Output
+          cat matrix.json
+          echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
 
   plan:
-    needs: build-matrix
+    needs: prepare
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
-    outputs:
-      # Crear un output para cada combinación que indique si tuvo éxito
-      result: ${{ steps.set-result.outputs.result }}
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
     steps:
       - name: Plan ${{ matrix.project }}:${{ matrix.env }}
-        id: plan-step
-        continue-on-error: true
+        id: plan
         run: |
-          echo "Plan ${{ matrix.project }}:${{ matrix.env }}"
-          # Simulando el fallo específico de 1000-5:prd
+          echo "Running plan for ${{ matrix.project }}:${{ matrix.env }}"
+          
+          # Simular fallo para 1000-5:prd
           if [[ "${{ matrix.project }}" == "1000-5" && "${{ matrix.env }}" == "prd" ]]; then
-            echo "Error: Plan failed for 1000-5:prd"
+            echo "::error::Plan failed for 1000-5:prd"
             exit 1
           fi
-
-      - name: Set result output
-        id: set-result
+          
+          echo "Plan completed successfully"
+      
+      - name: Save plan status
+        if: always()
         run: |
-          echo "result=${{ steps.plan-step.outcome }}" >> $GITHUB_OUTPUT
-
-      - name: Mark job as failed if plan failed
-        if: steps.plan-step.outcome == 'failure'
-        run: |
-          echo "::error::Plan failed for ${{ matrix.project }}:${{ matrix.env }}"
-          exit 1
+          mkdir -p plan-status
+          if [[ "${{ steps.plan.outcome }}" == "success" ]]; then
+            echo "success" > plan-status/${{ matrix.project }}-${{ matrix.env }}.txt
+          else
+            echo "failure" > plan-status/${{ matrix.project }}-${{ matrix.env }}.txt
+          fi
+      
+      - name: Upload plan status
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: plan-status-${{ matrix.project }}-${{ matrix.env }}
+          path: plan-status/${{ matrix.project }}-${{ matrix.env }}.txt
+          retention-days: 1
 
   apply:
-    needs: [build-matrix, plan]
+    needs: [prepare, plan]
     if: always()
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
     environment: approve-${{ matrix.project }}-${{ matrix.env }}
     steps:
-      - name: Check if plan succeeded
-        id: check-plan
+      - name: Download plan status
+        uses: actions/download-artifact@v4
+        with:
+          name: plan-status-${{ matrix.project }}-${{ matrix.env }}
+          path: plan-status
+      
+      - name: Check plan status and apply
         run: |
-          # Verificar si el job de plan correspondiente tuvo éxito
-          PLAN_RESULT="${{ needs.plan.result }}"
+          PLAN_STATUS=$(cat plan-status/${{ matrix.project }}-${{ matrix.env }}.txt)
           
-          if [[ "$PLAN_RESULT" != "success" ]]; then
-            echo "::warning::Plan job did not succeed (status: $PLAN_RESULT). Skipping apply for ${{ matrix.project }}:${{ matrix.env }}"
-            echo "should_apply=false" >> $GITHUB_OUTPUT
-          else
-            echo "Plan succeeded. Proceeding with apply for ${{ matrix.project }}:${{ matrix.env }}"
-            echo "should_apply=true" >> $GITHUB_OUTPUT
+          echo "Plan status for ${{ matrix.project }}:${{ matrix.env }} = $PLAN_STATUS"
+          
+          if [[ "$PLAN_STATUS" != "success" ]]; then
+            echo "::warning::Plan failed for ${{ matrix.project }}:${{ matrix.env }}, skipping apply"
+            exit 1
           fi
-
-      - name: Apply ${{ matrix.project }}:${{ matrix.env }}
-        if: steps.check-plan.outputs.should_apply == 'true'
-        run: echo "Apply ${{ matrix.project }}:${{ matrix.env }}"
+          
+          echo "Applying ${{ matrix.project }}:${{ matrix.env }}"
+          # Aquí va tu lógica de apply
