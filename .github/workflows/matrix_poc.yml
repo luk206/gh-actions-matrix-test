@@ -104,14 +104,17 @@ jobs:
           MATRIX_LIST: ${{ github.event.inputs.matrix_list }}
           EXCLUDE_LIST: ${{ github.event.inputs.exclude_list }}
 
-  plan:
+  deploy:
     needs: build-matrix
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+    environment: approve-${{ matrix.project }}-${{ matrix.env }}
     steps:
       - name: Plan ${{ matrix.project }}:${{ matrix.env }}
+        id: plan
+        continue-on-error: true
         run: |
           echo "Plan ${{ matrix.project }}:${{ matrix.env }}"
           # Simulando el fallo específico de 1000-5:prd
@@ -120,13 +123,12 @@ jobs:
             exit 1
           fi
 
-  apply:
-    needs: [build-matrix, plan]
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
-    environment: approve-${{ matrix.project }}-${{ matrix.env }}
-    steps:
       - name: Apply ${{ matrix.project }}:${{ matrix.env }}
+        if: steps.plan.outcome == 'success'
         run: echo "Apply ${{ matrix.project }}:${{ matrix.env }}"
+      
+      - name: Mark job as failed if plan failed
+        if: steps.plan.outcome == 'failure'
+        run: |
+          echo "::error::Plan failed for ${{ matrix.project }}:${{ matrix.env }}, skipping apply"
+          exit 1
