@@ -22,39 +22,6 @@ on:
             {"project": "1000-9", "env": "dev"},
             {"project": "1000-9", "env": "mlops"},
             {"project": "1000-9", "env": "prd"},
-            {"project": "1000-10", "env": "dev"},
-            {"project": "1000-10", "env": "mlops"},
-            {"project": "1000-10", "env": "prd"},
-            {"project": "1000-11", "env": "dev"},
-            {"project": "1000-11", "env": "mlops"},
-            {"project": "1000-11", "env": "prd"},
-            {"project": "1000-12", "env": "dev"},
-            {"project": "1000-12", "env": "mlops"},
-            {"project": "1000-12", "env": "prd"},
-            {"project": "1000-13", "env": "dev"},
-            {"project": "1000-13", "env": "mlops"},
-            {"project": "1000-13", "env": "prd"},
-            {"project": "1000-14", "env": "dev"},
-            {"project": "1000-14", "env": "mlops"},
-            {"project": "1000-14", "env": "prd"},
-            {"project": "1000-15", "env": "dev"},
-            {"project": "1000-15", "env": "mlops"},
-            {"project": "1000-15", "env": "prd"},
-            {"project": "1000-16", "env": "dev"},
-            {"project": "1000-16", "env": "mlops"},
-            {"project": "1000-16", "env": "prd"},
-            {"project": "1000-17", "env": "dev"},
-            {"project": "1000-17", "env": "mlops"},
-            {"project": "1000-17", "env": "prd"},
-            {"project": "1000-18", "env": "dev"},
-            {"project": "1000-18", "env": "mlops"},
-            {"project": "1000-18", "env": "prd"},
-            {"project": "1000-19", "env": "dev"},
-            {"project": "1000-19", "env": "mlops"},
-            {"project": "1000-19", "env": "prd"},
-            {"project": "1000-20", "env": "dev"},
-            {"project": "1000-20", "env": "mlops"},
-            {"project": "1000-20", "env": "prd"}
           ]
 
       exclude_list:
@@ -104,16 +71,18 @@ jobs:
           MATRIX_LIST: ${{ github.event.inputs.matrix_list }}
           EXCLUDE_LIST: ${{ github.event.inputs.exclude_list }}
 
-  deploy:
+  plan:
     needs: build-matrix
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
-    environment: approve-${{ matrix.project }}-${{ matrix.env }}
+    outputs:
+      # Crear un output para cada combinación que indique si tuvo éxito
+      result: ${{ steps.set-result.outputs.result }}
     steps:
       - name: Plan ${{ matrix.project }}:${{ matrix.env }}
-        id: plan
+        id: plan-step
         continue-on-error: true
         run: |
           echo "Plan ${{ matrix.project }}:${{ matrix.env }}"
@@ -123,12 +92,40 @@ jobs:
             exit 1
           fi
 
-      - name: Apply ${{ matrix.project }}:${{ matrix.env }}
-        if: steps.plan.outcome == 'success'
-        run: echo "Apply ${{ matrix.project }}:${{ matrix.env }}"
-      
-      - name: Mark job as failed if plan failed
-        if: steps.plan.outcome == 'failure'
+      - name: Set result output
+        id: set-result
         run: |
-          echo "::error::Plan failed for ${{ matrix.project }}:${{ matrix.env }}, skipping apply"
+          echo "result=${{ steps.plan-step.outcome }}" >> $GITHUB_OUTPUT
+
+      - name: Mark job as failed if plan failed
+        if: steps.plan-step.outcome == 'failure'
+        run: |
+          echo "::error::Plan failed for ${{ matrix.project }}:${{ matrix.env }}"
           exit 1
+
+  apply:
+    needs: [build-matrix, plan]
+    if: always()
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+    environment: approve-${{ matrix.project }}-${{ matrix.env }}
+    steps:
+      - name: Check if plan succeeded
+        id: check-plan
+        run: |
+          # Verificar si el job de plan correspondiente tuvo éxito
+          PLAN_RESULT="${{ needs.plan.result }}"
+          
+          if [[ "$PLAN_RESULT" != "success" ]]; then
+            echo "::warning::Plan job did not succeed (status: $PLAN_RESULT). Skipping apply for ${{ matrix.project }}:${{ matrix.env }}"
+            echo "should_apply=false" >> $GITHUB_OUTPUT
+          else
+            echo "Plan succeeded. Proceeding with apply for ${{ matrix.project }}:${{ matrix.env }}"
+            echo "should_apply=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Apply ${{ matrix.project }}:${{ matrix.env }}
+        if: steps.check-plan.outputs.should_apply == 'true'
+        run: echo "Apply ${{ matrix.project }}:${{ matrix.env }}"
