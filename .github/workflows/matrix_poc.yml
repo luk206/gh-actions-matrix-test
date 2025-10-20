@@ -4,11 +4,61 @@ on:
   workflow_dispatch:
     inputs:
       matrix_list:
-        description: "Lista de combinaciones proyecto+env en JSON"
+        description: "List of project+env combinations as JSON"
         required: true
-        default: '[{"project": "1000-5", "env": "dev"}, ...]'
+        default: >
+          [
+            {"project": "1000-5", "env": "dev"},
+            {"project": "1000-5", "env": "mlops"},
+            {"project": "1000-5", "env": "prd"},
+            {"project": "1000-6", "env": "dev"},
+            {"project": "1000-6", "env": "prd"},
+            {"project": "1000-7", "env": "dev"},
+            {"project": "1000-7", "env": "mlops"},
+            {"project": "1000-7", "env": "prd"},
+            {"project": "1000-8", "env": "dev"},
+            {"project": "1000-8", "env": "mlops"},
+            {"project": "1000-8", "env": "prd"},
+            {"project": "1000-9", "env": "dev"},
+            {"project": "1000-9", "env": "mlops"},
+            {"project": "1000-9", "env": "prd"},
+            {"project": "1000-10", "env": "dev"},
+            {"project": "1000-10", "env": "mlops"},
+            {"project": "1000-10", "env": "prd"},
+            {"project": "1000-11", "env": "dev"},
+            {"project": "1000-11", "env": "mlops"},
+            {"project": "1000-11", "env": "prd"},
+            {"project": "1000-12", "env": "dev"},
+            {"project": "1000-12", "env": "mlops"},
+            {"project": "1000-12", "env": "prd"},
+            {"project": "1000-13", "env": "dev"},
+            {"project": "1000-13", "env": "mlops"},
+            {"project": "1000-13", "env": "prd"},
+            {"project": "1000-14", "env": "dev"},
+            {"project": "1000-14", "env": "mlops"},
+            {"project": "1000-14", "env": "prd"},
+            {"project": "1000-15", "env": "dev"},
+            {"project": "1000-15", "env": "mlops"},
+            {"project": "1000-15", "env": "prd"},
+            {"project": "1000-16", "env": "dev"},
+            {"project": "1000-16", "env": "mlops"},
+            {"project": "1000-16", "env": "prd"},
+            {"project": "1000-17", "env": "dev"},
+            {"project": "1000-17", "env": "mlops"},
+            {"project": "1000-17", "env": "prd"},
+            {"project": "1000-18", "env": "dev"},
+            {"project": "1000-18", "env": "mlops"},
+            {"project": "1000-18", "env": "prd"},
+            {"project": "1000-19", "env": "dev"},
+            {"project": "1000-19", "env": "mlops"},
+            {"project": "1000-19", "env": "prd"},
+            {"project": "1000-20", "env": "dev"},
+            {"project": "1000-20", "env": "mlops"},
+            {"project": "1000-20", "env": "prd"}
+          ]
+
       exclude_list:
-        description: "Array de project:env a excluir"
+        description: "Array of project:env combos to exclude"
         required: false
         default: '["1000-5:mlops","1000-6:dev"]'
 
@@ -16,17 +66,40 @@ jobs:
   build-matrix:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.filter-matrix.outputs.matrix }}
     steps:
-      - id: set-matrix
+      - name: Filter matrix based on exclusions
+        id: filter-matrix
         run: |
-          python3 <<EOF
-          import json, os
-          matrix = json.loads(os.environ['MATRIX_LIST'])
-          exclude = set(json.loads(os.environ['EXCLUDE_LIST']))
-          filtered = [x for x in matrix if f"{x['project']}:{x['env']}" not in exclude]
-          print(f"::set-output name=matrix::{json.dumps({'include': filtered})}")
-          EOF
+          cat > filter.py << 'PYTHON_SCRIPT'
+          import json
+          import os
+          import sys
+          
+          # Parse inputs
+          matrix_input = json.loads(os.environ['MATRIX_LIST'])
+          exclude_input = json.loads(os.environ['EXCLUDE_LIST'])
+          
+          # Create set of exclusions for fast lookup
+          exclude_set = set(exclude_input)
+          
+          # Filter matrix
+          filtered = []
+          for item in matrix_input:
+              combo = f"{item['project']}:{item['env']}"
+              if combo not in exclude_set:
+                  filtered.append(item)
+          
+          # Output in GitHub Actions matrix format
+          result = {"include": filtered}
+          print(f"Filtered matrix: {json.dumps(result, indent=2)}", file=sys.stderr)
+          
+          # Set output using new GitHub Actions format
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f"matrix={json.dumps(result)}\n")
+          PYTHON_SCRIPT
+          
+          python3 filter.py
         env:
           MATRIX_LIST: ${{ github.event.inputs.matrix_list }}
           EXCLUDE_LIST: ${{ github.event.inputs.exclude_list }}
@@ -35,15 +108,25 @@ jobs:
     needs: build-matrix
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{fromJson(needs.build-matrix.outputs.matrix)}}
+      fail-fast: false
+      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
     steps:
-      - run: echo "Plan ${{ matrix.project }}:${{ matrix.env }}"
+      - name: Plan ${{ matrix.project }}:${{ matrix.env }}
+        run: |
+          echo "Plan ${{ matrix.project }}:${{ matrix.env }}"
+          # Simulando el fallo específico de 1000-5:prd
+          if [[ "${{ matrix.project }}" == "1000-5" && "${{ matrix.env }}" == "prd" ]]; then
+            echo "Error: Plan failed for 1000-5:prd"
+            exit 1
+          fi
 
   apply:
-    needs: plan
+    needs: [build-matrix, plan]
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{fromJson(needs.build-matrix.outputs.matrix)}}
+      fail-fast: false
+      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
     environment: approve-${{ matrix.project }}-${{ matrix.env }}
     steps:
-      - run: echo "Apply ${{ matrix.project }}:${{ matrix.env }}"
+      - name: Apply ${{ matrix.project }}:${{ matrix.env }}
+        run: echo "Apply ${{ matrix.project }}:${{ matrix.env }}"
