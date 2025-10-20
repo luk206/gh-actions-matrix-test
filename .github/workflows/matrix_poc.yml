@@ -6,23 +6,7 @@ on:
       matrix_list:
         description: "List of project+env combinations as JSON"
         required: true
-        default: >
-          [
-            {"project": "1000-5", "env": "dev"},
-            {"project": "1000-5", "env": "mlops"},
-            {"project": "1000-5", "env": "prd"},
-            {"project": "1000-6", "env": "dev"},
-            {"project": "1000-6", "env": "prd"},
-            {"project": "1000-7", "env": "dev"},
-            {"project": "1000-7", "env": "mlops"},
-            {"project": "1000-7", "env": "prd"},
-            {"project": "1000-8", "env": "dev"},
-            {"project": "1000-8", "env": "mlops"},
-            {"project": "1000-8", "env": "prd"},
-            {"project": "1000-9", "env": "dev"},
-            {"project": "1000-9", "env": "mlops"},
-            {"project": "1000-9", "env": "prd"},
-          ]
+        default: '[{"project":"1000-5","env":"dev"},{"project":"1000-5","env":"mlops"},{"project":"1000-5","env":"prd"},{"project":"1000-6","env":"dev"},{"project":"1000-6","env":"prd"},{"project":"1000-7","env":"dev"},{"project":"1000-7","env":"mlops"},{"project":"1000-7","env":"prd"},{"project":"1000-8","env":"dev"},{"project":"1000-8","env":"mlops"},{"project":"1000-8","env":"prd"},{"project":"1000-9","env":"dev"},{"project":"1000-9","env":"mlops"},{"project":"1000-9","env":"prd"}]'
 
       exclude_list:
         description: "Array of project:env combos to exclude"
@@ -43,9 +27,22 @@ jobs:
           import os
           import sys
           
-          # Parse inputs
-          matrix_input = json.loads(os.environ['MATRIX_LIST'])
-          exclude_input = json.loads(os.environ['EXCLUDE_LIST'])
+          # Parse inputs - strip whitespace and newlines
+          matrix_str = os.environ['MATRIX_LIST'].strip().replace('\n', '').replace('\r', '')
+          exclude_str = os.environ['EXCLUDE_LIST'].strip().replace('\n', '').replace('\r', '')
+          
+          # Debug: print raw inputs
+          print(f"Raw matrix input length: {len(matrix_str)}", file=sys.stderr)
+          print(f"Raw exclude input length: {len(exclude_str)}", file=sys.stderr)
+          
+          try:
+              matrix_input = json.loads(matrix_str)
+              exclude_input = json.loads(exclude_str)
+          except json.JSONDecodeError as e:
+              print(f"JSON Parse Error: {e}", file=sys.stderr)
+              print(f"Matrix string: {matrix_str[:100]}...", file=sys.stderr)
+              print(f"Exclude string: {exclude_str}", file=sys.stderr)
+              sys.exit(1)
           
           # Create set of exclusions for fast lookup
           exclude_set = set(exclude_input)
@@ -59,7 +56,7 @@ jobs:
           
           # Output in GitHub Actions matrix format
           result = {"include": filtered}
-          print(f"Filtered matrix: {json.dumps(result, indent=2)}", file=sys.stderr)
+          print(f"Filtered {len(filtered)} combinations from {len(matrix_input)} total", file=sys.stderr)
           
           # Set output using new GitHub Actions format
           with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
